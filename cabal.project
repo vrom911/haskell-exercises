@@ -1,0 +1,11 @@
+packages:
+  01-GADTs/
+  02-FlexibleInstances/
+  03-KindSignatures/
+  04-DataKinds/
+  05-RankNTypes/
+  06-TypeFamilies/
+  07-ConstraintKinds/
+  08-PolyKinds/
+  09-MultiParamTypeClasses/
+  10-FunctionalDependencies/
