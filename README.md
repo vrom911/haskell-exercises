@@ -1,5 +1,7 @@
 # GHC exercises 🚀
 
+[![Build status](https://img.shields.io/travis/vrom911/haskell-exercises.svg?logo=travis)](https://travis-ci.org/vrom911/haskell-exercises)
+
 OK, you know your **monoids** from your **monads**. You know how to write a
 terminal application or two. What's next? What are these language extensions
 that keep being mentioned? How "type-safe" can you _really_ be?
@@ -20,7 +22,7 @@ compile-time. This is _not_ based around concepts; there won't be sections on
 concepts will turn up throughout as we dig deeper into the extensions.
 
 > If you're interested in something more project-based, I absolutely, 1000%
-> recommend [Thinking with Types](https://leanpub.com/thinking-with-types), 
+> recommend [Thinking with Types](https://leanpub.com/thinking-with-types),
 > written by [Sandy Maguire](https://github.com/isovector). It is a
 > **fantastic** resource, and one on which I already rely when explaining
 > concepts to others.
