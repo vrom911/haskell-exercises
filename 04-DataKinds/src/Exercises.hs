@@ -298,9 +298,8 @@ data SmallerThan (limit :: Nat) where
 
 -- | b. Write the '(!!)' function:
 
-(!!) :: Vector n a -> SmallerThan n -> Maybe a
-VNil !! _ = Nothing
-(VCons a v) !! ZSmaller = Just a
+(!!) :: Vector n a -> SmallerThan n -> a
+(VCons a v) !! ZSmaller = a
 (VCons _ v) !! (SSmaller n) = v !! n
 
 -- | c. Write a function that converts a @SmallerThan n@ into a 'Nat'.
