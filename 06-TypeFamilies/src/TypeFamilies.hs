@@ -16,6 +16,7 @@ data Nat = Z | S Nat
 
 add :: Nat -> Nat -> Nat
 add  Z    y = y
+add  x    Z = x
 add (S x) y = S (add x y)
 
 {-
