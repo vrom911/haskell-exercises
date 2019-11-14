@@ -1,11 +1,16 @@
-{-# LANGUAGE ConstraintKinds #-}
-{-# LANGUAGE DataKinds #-}
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE GADTs #-}
-{-# LANGUAGE KindSignatures #-}
-{-# LANGUAGE RankNTypes #-}
-{-# LANGUAGE TypeFamilies #-}
-{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE AllowAmbiguousTypes  #-}
+{-# LANGUAGE ConstraintKinds      #-}
+{-# LANGUAGE DataKinds            #-}
+{-# LANGUAGE FlexibleInstances    #-}
+{-# LANGUAGE GADTs                #-}
+{-# LANGUAGE KindSignatures       #-}
+{-# LANGUAGE RankNTypes           #-}
+{-# LANGUAGE ScopedTypeVariables  #-}
+{-# LANGUAGE TypeApplications     #-}
+{-# LANGUAGE TypeFamilies         #-}
+{-# LANGUAGE TypeOperators        #-}
+{-# LANGUAGE UndecidableInstances #-}
+
 module Exercises where -- ^ This is starting to look impressive, right?
 
 import Data.Kind (Constraint, Type)
@@ -14,9 +19,6 @@ import Data.Kind (Constraint, Type)
 -- about ConstraintKinds, as it's hopefully quite an intuitive extension: we're
 -- just extending the set of things that we can use as constraints to include
 -- type parameters!
-
-
-
 
 
 {- ONE -}
@@ -34,13 +36,20 @@ data List a = Nil | Cons a (List a)
 -- constraints can the @Nil@ case satisfy?
 
 data ConstrainedList (c :: Type -> Constraint) where
-  -- IMPLEMENT ME
+    CNil :: ConstrainedList c
+    CCons :: c a => a -> ConstrainedList c -> ConstrainedList c
 
 -- | b. Using what we know about RankNTypes, write a function to fold a
 -- constrained list. Note that we'll need a folding function that works /for
 -- all/ types who implement some constraint @c@. Wink wink, nudge nudge.
 
--- foldConstrainedList :: ???
+foldConstrainedList
+    :: Monoid a
+    => ConstrainedList c
+    -> (forall x . c x => x -> a)
+    -> a
+foldConstrainedList CNil           _ = mempty
+foldConstrainedList (CCons a rest) f = f a <> foldConstrainedList rest f
 
 -- | Often, I'll want to constrain a list by /multiple/ things. The problem is
 -- that I can't directly write multiple constraints into my type, because the
@@ -53,15 +62,11 @@ data ConstrainedList (c :: Type -> Constraint) where
 -- | c. Write this class instance so that we can have a constraint that
 -- combines `Monoid a` and `Show a`. What other extension did you need to
 -- enable? Why?
-
--- class ??? => Constraints a
--- instance ??? => Constraints a
+class (Monoid x, Show x) => MonoidShow x
+instance (Monoid x, Show x) => MonoidShow x
 
 -- | What can we now do with this constrained list that we couldn't before?
 -- There are two opportunities that should stand out!
-
-
-
 
 
 {- TWO -}
@@ -77,12 +82,22 @@ data HList (xs :: [Type]) where
 -- of some constraint. To do that, though, we'd need to know that everything in
 -- the list implemented a given constraint... if only we had a type family for
 -- this...
+type family Every (c :: Type -> Constraint) (x :: [Type]) :: Constraint where
+    Every f '[] = ()
+    Every f (x:xs) = (f x, Every f xs)
 
 -- | a. Write this fold function. I won't give any hints to the definition, but
 -- we will probably need to call it like this:
+foldHList
+    :: forall c xs m . (Every c xs, Monoid m)
+    => HList xs
+    -> (forall x . c x => x -> m)
+    -> m
+foldHList HNil _           = mempty
+foldHList (HCons x rest) f = f x <> foldHList @c rest f
 
--- test :: ??? => HList xs -> String
--- test = fold (TCProxy :: TCProxy Show) show
+test :: (Every Show xs) => HList xs -> String
+test l = foldHList @Show l show
 
 -- | b. Why do we need the proxy to point out which constraint we're working
 -- with?  What does GHC not like if we remove it?
@@ -101,3 +116,5 @@ f :: a ~ b => a -> b
 f = id
 
 -- | Write @foldMap@ for @HList@!
+foldMapHList :: forall c xs m a . (Monoid m, Every ((~) a) xs) => (a -> m) -> HList xs -> m
+foldMapHList f hl = foldHList @((~) a) hl f
